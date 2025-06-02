@@ -14,8 +14,8 @@ public:
     {}
 
     // Getters
-    [[nodiscard]] const point3& origin() const { return orig; }
-    [[nodiscard]] const vec3& direction() const { return dir; }
+    const point3& origin() const { return orig; }
+    const vec3& direction() const { return dir; }
 
     // Methods
     point3 at(double t) const

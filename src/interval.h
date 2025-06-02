@@ -11,7 +11,7 @@ public:
     interval() : min(+infinity), max(-infinity) {} // Default interval is empty
     interval(double min, double max) : min(min), max(max) {}
 
-    // Methods
+    // Public methods
     double size() const
     {
         return max - min;
@@ -27,11 +27,19 @@ public:
         return (min < x) && (x < max);
     }
 
+    // Ensure that the result is within the range [min, max]
+    double clamp(double x) const
+    {
+        if (x < min) { return min; }
+        if (x > max) { return max;}
+        return x;
+    }
+
     // Static attributes (public visibility)
     static const interval empty, universe;
 };
 
-const interval interval::empty = interval(+infinity, -infinity);
+const interval interval::empty    = interval(+infinity, -infinity);
 const interval interval::universe = interval(-infinity, +infinity);
 
 #endif // INTERVAL_H

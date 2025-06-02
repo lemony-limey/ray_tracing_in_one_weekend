@@ -21,18 +21,18 @@ public:
 
     void add(shared_ptr<hittable> object) { objects.push_back(object); }
 
-    bool hit(const ray &r, double ray_tmin, double ray_tmax, hit_record &rec) const override
+    bool hit(const ray &r, interval ray_t, hit_record &rec) const override
     {
         hit_record temp_rec;
         bool hit_anything = false;
-        auto closest_so_far = ray_tmax;
+        auto closest_so_far = ray_t.max;
 
         // Iterate over all objects in the frame to find which (if any) have had a collision with
         // a ray, and of those objects which is the closest to the camera.
         // This will let us know which should be rendered to the screen.
         for (const auto& object : objects)
         {
-            if (object->hit(r, ray_tmin, closest_so_far, temp_rec))
+            if (object->hit(r, interval(ray_t.min, closest_so_far), temp_rec))
             {
                 hit_anything = true;
                 closest_so_far = temp_rec.t;
@@ -42,8 +42,6 @@ public:
 
         return hit_anything;
     }
-
-
 };
 
 #endif // HITTABLE_LIST_H
