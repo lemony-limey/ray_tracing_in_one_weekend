@@ -34,6 +34,9 @@ int main()
     camera.look_at      = point3(0, 0, -1);
     camera.view_up      = vec3(0, 1, 0);
 
+    camera.defocus_angle  = 10.0;
+    camera.focus_distance = 3.4;
+
     // Generate the image
     camera.render(world);
 
