@@ -12,6 +12,11 @@ public:
     int    samples_per_pixel = 10;  // Count of random samples for each pixel
     int    max_depth         = 10;  // Maximum number of ray bounces into the scene
 
+    double vertical_fov = 90;  // Vertical view angle (field of view)
+    point3 look_from    = point3(0, 0, 0);  // Point camera is looking from
+    point3 look_at      = point3(0, 0, -1); // Point camera is looking at
+    vec3   view_up      = vec3(0, 1, 0);    // Camera-relative "up" direction
+
     // Public methods
     void render(const hittable& world)
     {
@@ -48,6 +53,7 @@ private:
     point3 pixel00_loc;               // Location of pixel (0,0)
     vec3   pixel_delta_u;             // Offset to pixel to the right
     vec3   pixel_delta_v;             // Offset to pixel below
+    vec3   u, v, w;                   // Camera frame basis vectors
 
     // Private methods
     void initialise()
@@ -58,24 +64,30 @@ private:
 
         pixel_samples_scale = 1.0 / samples_per_pixel;
 
-        center = point3(0, 0, 0);
+        center = look_from;
 
-        auto focal_length = 1.0;
-        // Viewport widths less than 1 are ok since the widths are from
-        // the reals, not the integers.
-        auto viewport_height = 2.0;
+        // Determine viewport dimensions.
+        auto focal_length = (look_from - look_at).length();
+        auto theta = degrees_to_radians(vertical_fov);
+        auto h = std::tan(theta / 2);
+        auto viewport_height = 2 * h * focal_length;
         auto viewport_width = viewport_height * (double(image_width) / image_height);
 
+        // Calculate the u, v, w unit basis vectors for the camera coordinate frame.
+        w = unit_vector(look_from - look_at);
+        u = unit_vector(cross(view_up, w));
+        v = cross(w, u);
+
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
-        auto viewport_u = vec3(viewport_width, 0, 0);
-        auto viewport_v = vec3(0, -viewport_height, 0);
+        vec3 viewport_u = viewport_width * u;    // Vector across viewport horizontal edge
+        vec3 viewport_v = viewport_height * -v;  // Vector down viewport vertical edge
 
         // Calculate the horizontal and vertical delta vectors from pixel to pixel.
         pixel_delta_u = viewport_u / image_width;
         pixel_delta_v = viewport_v / image_height;
 
         // Calculate the location of the upper left pixel.
-        auto viewport_upper_left = center - vec3(0, 0, focal_length) - viewport_u/2 - viewport_v/2;
+        auto viewport_upper_left = center - (focal_length * w) - viewport_u/2 - viewport_v/2;
         pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
     }
 
